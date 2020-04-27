@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import DeleteBtn from "../components/DeleteBtn";
+import AddBtn from "../components/AddBtn"
 import Jumbotron from "../components/Jumbotron";
 import API from "../utils/API";
 import { Link } from "react-router-dom";
@@ -42,20 +43,21 @@ class Search extends Component {
     });
   };
 
-  saveGoogleBook = event => {
-    event.preventDefault();
-    if (this.state.title) {
-      API.saveBook({
-        title: this.state.title,
-        author: this.state.author,
-        description: this.state.description,
-        image: this.state.image,
-        link: this.state.link
+  saveGoogleBook = (book) => {
+    API.saveBook({
+      title: book.title,
+      author: book.author,
+      description: book.description,
+      image: book.image,
+      link: book.link
+    })
+      .then(res => {
+        // this.loadBooks()
+        console.log("saved Book!");
       })
-        .then(res => this.loadBooks())
-        .catch(err => console.log(err));
-    }
+      .catch(err => console.log(err));
   };
+
   handleFormSubmit = event => {
     event.preventDefault();
     if (this.state.title) {
@@ -63,21 +65,31 @@ class Search extends Component {
         query: this.state.title
       })
         .then(res => {
-          console.log(res.data.items);
-          
+          let tempBooks = [];
+          // console.log(res.data.items);
+          res.data.items.forEach(bookItem => {
+            console.log(bookItem)
+            tempBooks.push({
+              id: bookItem.id,
+              title: bookItem.volumeInfo.title,
+              author: bookItem.volumeInfo.authors,
+              description: bookItem.volumeInfo.description,
+              image: bookItem.volumeInfo.imageLinks.thumbnail,
+              link: bookItem.volumeInfo.previewLink
+            })
+          });
+          console.log(tempBooks);
+          this.setState({books: tempBooks, title: ""});
         })
         .catch(err => console.log(err));
     }
   };
-  // this.setState({ books: res.data, title: "", author: "", description: "", image: "", link:"" }
   render() {
     return (
       <Container fluid>
         <Row>
-          <Col size="md-6">
-            <Jumbotron>
-              <h1>What Books Should I Read?</h1>
-            </Jumbotron>
+          <Col size="12">
+            <h1 className="border text-light text-center bg-info">React Google Books</h1>
             <form>
               <Input
                 value={this.state.title}
@@ -85,18 +97,6 @@ class Search extends Component {
                 name="title"
                 placeholder="Title (required)"
               />
-              {/* <Input
-                value={this.state.author}
-                onChange={this.handleInputChange}
-                name="author"
-                placeholder="Author (required)"
-              /> */}
-              {/* <TextArea
-                value={this.state.description}
-                onChange={this.handleInputChange}
-                name="description"
-                placeholder="description (Optional)"
-              /> */}
               <FormBtn
                 disabled={!(this.state.title)}
                 onClick={this.handleFormSubmit}
@@ -105,20 +105,25 @@ class Search extends Component {
               </FormBtn>
             </form>
           </Col>
-          <Col size="md-6 sm-12">
-            <Jumbotron>
-              <h1>Books On My List</h1>
-            </Jumbotron>
+        </Row>
+        <Row>
+          <Col size="12">
+            <h1 className="border text-light text-center bg-info">Search Results</h1>
             {this.state.books.length ? (
               <List>
                 {this.state.books.map(book => (
-                  <ListItem key={book._id}>
-                    <Link to={"/books/" + book._id}>
+                  <ListItem key={book.id}>
+                    <img src={book.image} alt="book thumbnail"></img>
+                    <a href={book.link}>
                       <strong>
-                        {book.title} by {book.author}
+                        {book.title} by {book.author.map((name, i) => <span key={i}>{name} </span>)}
                       </strong>
-                    </Link>
-                    <DeleteBtn onClick={() => this.deleteBook(book._id)} />
+                    </a>
+                    {/* <DeleteBtn onClick={() => this.deleteBook(book._id)} /> */}
+                    <AddBtn onClick={() => {
+                      this.saveGoogleBook(book);
+                      // console.log(book);
+                      }}/>
                   </ListItem>
                 ))}
               </List>
