@@ -4,9 +4,15 @@ import config from "./config.js";
 export default {
   // Gets all books
   searchBooks: function(query) {
+    let apiKey = "";
+    if (typeof process.env.BOOKS_KEY == "undefined") {
+      apiKey = config.BOOKS_KEY;
+    }
+    else{
+      apiKey = process.env.BOOKS_KEY;
+    }
     const queryString = query.query.replace(/\s/g, "+");
-    console.log(config);
-    return axios.get("https://www.googleapis.com/books/v1/volumes?q="+queryString+"&key="+config.BOOKS_KEY);
+    return axios.get("https://www.googleapis.com/books/v1/volumes?q="+queryString+"&key="+apiKey);
   },
   getBooks: function() {
     return axios.get("/api/books");
