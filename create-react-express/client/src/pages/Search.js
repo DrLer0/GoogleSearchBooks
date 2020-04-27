@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import DeleteBtn from "../components/DeleteBtn";
 import AddBtn from "../components/AddBtn"
 import Jumbotron from "../components/Jumbotron";
 import API from "../utils/API";
@@ -53,7 +52,7 @@ class Search extends Component {
     })
       .then(res => {
         // this.loadBooks()
-        console.log("saved Book!");
+        alert(book.title+" Saved!");
       })
       .catch(err => console.log(err));
   };
@@ -66,15 +65,22 @@ class Search extends Component {
       })
         .then(res => {
           let tempBooks = [];
+          let imgURL = ""
           // console.log(res.data.items);
           res.data.items.forEach(bookItem => {
             console.log(bookItem)
+            if(typeof bookItem.volumeInfo.imageLinks == "undefined"){
+              imgURL = require("../utils/missingBook.png");
+            }
+            else{
+              imgURL = bookItem.volumeInfo.imageLinks.thumbnail;
+            }
             tempBooks.push({
               id: bookItem.id,
               title: bookItem.volumeInfo.title,
               author: bookItem.volumeInfo.authors,
               description: bookItem.volumeInfo.description,
-              image: bookItem.volumeInfo.imageLinks.thumbnail,
+              image: imgURL,
               link: bookItem.volumeInfo.previewLink
             })
           });
@@ -101,13 +107,14 @@ class Search extends Component {
                 disabled={!(this.state.title)}
                 onClick={this.handleFormSubmit}
               >
-                Submit Book
+                Search Book
               </FormBtn>
             </form>
           </Col>
         </Row>
         <Row>
-          <Col size="12">
+          <Col size="lg-2"></Col>
+          <Col size="lg-8 sm-12">
             <h1 className="border text-light text-center bg-info">Search Results</h1>
             {this.state.books.length ? (
               <List>
@@ -116,7 +123,10 @@ class Search extends Component {
                     <img src={book.image} alt="book thumbnail"></img>
                     <a href={book.link}>
                       <strong>
-                        {book.title} by {book.author.map((name, i) => <span key={i}>{name} </span>)}
+                      {book.title} by {book.author.length > 1 ?
+                        (book.author.map((name, i) => <span key={i}>{name} </span>)) :
+                        book.author
+                      }
                       </strong>
                     </a>
                     {/* <DeleteBtn onClick={() => this.deleteBook(book._id)} /> */}
