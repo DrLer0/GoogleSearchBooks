@@ -5,7 +5,7 @@ export default {
   // Gets all books
   searchBooks: function(query) {
     const queryString = query.query.replace(/\s/g, "+");
-    console.log(queryString);
+    console.log(config);
     return axios.get("https://www.googleapis.com/books/v1/volumes?q="+queryString+"&key="+config.BOOKS_KEY);
   },
   getBooks: function() {
